@@ -1,8 +1,11 @@
 
+import "@babel/polyfill";
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
+import 'whatwg-fetch';
 // const humanizeDuration = require('humanize-duration');
 import humanizeDuration from 'humanize-duration';
+import moment from 'moment';
 import './index.scss';
 
 class ActivityItem extends React.Component {
@@ -20,8 +23,12 @@ class ActivityItem extends React.Component {
 	getDuration() {
 		let duration = Math.round(this.state.nextTime) * 1000 - (Math.round(Date.now() / 1000) * 1000);
 
+		
+
 		if (duration > 0) {
-			return 'Due in ' + humanizeDuration(duration, {largest: 1});
+			// return 'Due in ' + humanizeDuration(duration, {largest: 2});
+			let m = moment.unix(this.state.nextTime).calendar();
+			return `Due ${m}`; 
 		} else {
 			return '';
 		}
@@ -37,7 +44,7 @@ class ActivityItem extends React.Component {
 		let now = (Date.now() / 1000);
 		if (this.state.nextTime < now || typeof this.state.nextTime !== 'number') {
 			classes += ' bad ';
-		} else if (this.state.nextTime > now &&  this.state.nextTime < now + 43200 ) {
+		} else if (this.state.nextTime > now &&  this.state.nextTime < now + 21600 ) {
 			classes += ' soon ';
 		} else {
 			classes += ' good ';
@@ -47,8 +54,10 @@ class ActivityItem extends React.Component {
 
 	getLastDate() {
 		if (this.state.lastTime) {
-			let d = new Date(this.state.lastTime * 1000).toLocaleString();
-			return d;
+			let d = new Date(this.state.lastTime * 1000);
+			// let m = moment(d).format('h:mm A');
+			let m = moment(d).fromNow();
+			return m;
 		} else {
 			return '';
 		}
@@ -57,7 +66,7 @@ class ActivityItem extends React.Component {
 	
 	markDone(item, e) {
 		this.setState({pending: true});
-		fetch('/api/update', {
+		window.fetch('/api/update', {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'
@@ -105,7 +114,7 @@ class ActivityList extends React.Component {
 			// this.state.items.forEach((item) => {
 			// 	rows.push(<ActivityItem activityText={item.activity_text} lastTime={item.last_time} pk={item.pk} ></ActivityItem>);
 			// });
-			return (<div className="container">{this.state.items.map((item, index) => <ActivityItem activityText={item.activity_text} lastTime={item.last_checkin} nextTime={item.next_checkin} pk={item.pk} key={index} ></ActivityItem>)}</div>)
+			return (<>{this.state.items.map((item, index) => <ActivityItem activityText={item.activity_text} lastTime={item.last_checkin} nextTime={item.next_checkin} pk={item.pk} key={index} ></ActivityItem>)}</>)
 		} else {
 			return (<div>Loading..</div>)
 		}
@@ -114,7 +123,7 @@ class ActivityList extends React.Component {
 	}
 
 	pollData () {
-		fetch('/api/category.json/' + this.state.category)
+		window.fetch('/api/category.json/' + this.state.category + '?' + Date.now())
 		  .then(response => response.json())
 		  .then(items => this.setState({ items }));
 	}
@@ -161,17 +170,19 @@ class CategoryList extends React.Component {
 		this.props.handleCategorySelect(category);
 	}
 
+	
+
 
 	render () {
 		if (this.state.categories.length > 0) {
-			return (<div className="container">{this.state.categories.map((item, index) => <CategoryItem pk={item.pk} name={item.name} key={item.pk} handleCategorySelect={this.handleCategorySelect}></CategoryItem>)}</div>)
+			return (<>{this.state.categories.map((item, index) => <CategoryItem pk={item.pk} name={item.name} key={item.pk} handleCategorySelect={this.handleCategorySelect}></CategoryItem>)}</>)
 		} else {
 			return (<div>Loading..</div>)
 		}
 	}
 
 	pollData () {
-		fetch('/api/get_categories')
+		window.fetch('/api/get_categories')
 		  .then(response => response.json())
 		  .then(categories => this.setState({ categories }));
 	}
@@ -197,9 +208,10 @@ class ClockView extends React.Component {
 	}
 
 	displayTime () {
-		var h = this.state.time.getHours();
-		var m = this.state.time.getMinutes();
-		return  this.state.time.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+		// var h = this.state.time.getHours();
+		// var m = this.state.time.getMinutes();
+		// return  this.state.time.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+		return moment().format('h:mm A');
 	}
 
 	render() {
@@ -275,7 +287,7 @@ class WeatherView extends React.Component {
 	}
 
 	pollData () {
-		fetch('/api/get_data')
+		window.fetch('/api/get_data')
 		  .then(response => response.json())
 		  .then(data => this.setState({ 
 			  data,
@@ -312,8 +324,12 @@ class HeaderView extends React.Component {
 		}
 	}
 
+	getHeaderClass() {
+		return navigator.userAgent.includes('9_3_5') ? 'header-nogrid' : 'header';
+	}
+
 	render () {
-		return (<div className="header">
+		return (<div className={this.getHeaderClass()}>
 			<div>{this.backButton()}</div>
 			<ClockView></ClockView>
 			<WeatherView></WeatherView>
@@ -334,6 +350,10 @@ class ActivityView extends React.Component {
 		this.handleCategorySelect = this.handleCategorySelect.bind(this);
 	}
 
+	containerClass () {
+		return navigator.userAgent.includes('9_3_5') ? 'container-nogrid' : 'container';
+	}
+
 	handleCategorySelect (category) {
 		this.setState({selectedCategory: category});
 	}
@@ -342,17 +362,30 @@ class ActivityView extends React.Component {
 		if (this.state.selectedCategory !== null) {
 			return (<div>
 				<HeaderView hasCategory={true} handleCategorySelect={this.handleCategorySelect}></HeaderView>
-				<ActivityList items={[]} key={this.state.selectedCategory} category={this.state.selectedCategory}></ActivityList>
+				<div className={this.containerClass()}><ActivityList items={[]} key={this.state.selectedCategory} category={this.state.selectedCategory}></ActivityList></div>
 			</div>)
 		} else {
 			return (<div>
 				<HeaderView hasCategory={false} ></HeaderView>
-				<CategoryList categories={[]} handleCategorySelect={this.handleCategorySelect}></CategoryList>
+				<div className={this.containerClass()}><CategoryList categories={[]} handleCategorySelect={this.handleCategorySelect}></CategoryList></div>
 			</div>)
 		}
 	}
+}
+
+class LightButton extends React.Component {
+
+}
+
+class LightControlView extends React.Component {
+	constructor(props) {
+		super(props);
+	}
 
 
+	render () {
+		return (<div></div>);
+	}
 }
 
 
