@@ -1,4 +1,6 @@
 
+@import "~react-vis/dist/style";
+
 $screen-small: 1023px;
 
 body {
@@ -35,7 +37,7 @@ body {
 	display: grid;
 	-ms-grid-columns: 32% 2% 32% 2% 32%;
 	grid-template-columns: auto auto auto;
-	-ms-grid-rows: 100px 20px 100px 20px 100px 20px 100px 20px 100px;
+	-ms-grid-rows: 100px 20px 100px 20px 100px 20px 100px 20px 100px 20px 100px 20px 100px;
 	grid-auto-rows: 100px;
 	grid-gap: 20px;
 	justify-items: center;
@@ -78,6 +80,10 @@ body {
 	}
 	.good {
 		background-color: rgba(46, 204, 64, 0.75);
+	}
+
+	.light-on {
+		background-color: rgba(255, 220, 00, 0.75);
 	}
 	
 	.pulseBox {
@@ -184,6 +190,30 @@ body {
 	-ms-grid-column: 5;
 }
 
+.container > *:nth-child(16) {
+	-ms-grid-row: 11;
+	-ms-grid-column: 1;
+}
+.container > *:nth-child(17) {
+	-ms-grid-row: 11;
+	-ms-grid-column: 3;
+}
+.container > *:nth-child(18) {
+	-ms-grid-row: 11;
+	-ms-grid-column: 5;
+}
+.container > *:nth-child(19) {
+	-ms-grid-row: 13;
+	-ms-grid-column: 1;
+}
+.container > *:nth-child(20) {
+	-ms-grid-row: 13;
+	-ms-grid-column: 3;
+}
+.container > *:nth-child(21) {
+	-ms-grid-row: 13;
+	-ms-grid-column: 5;
+}
 
 
 
@@ -256,6 +286,11 @@ body {
 		color: #fff;
 		font-weight: bold;
 		border-radius: 3px;
+	}
+
+	.grey-button {
+		background-color: #ccd459;
+		width: 40px;
 	}
 }
 

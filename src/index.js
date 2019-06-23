@@ -3,9 +3,15 @@ import "@babel/polyfill";
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import 'whatwg-fetch';
-// const humanizeDuration = require('humanize-duration');
 import humanizeDuration from 'humanize-duration';
 import moment from 'moment';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faLightbulbSlash, faLightbulbOn, faLightbulb } from '@fortawesome/pro-light-svg-icons';
+import {XYPlot, XAxis, YAxis, HorizontalGridLines, LineSeries} from 'react-vis';
+
+
+
+
 import './index.scss';
 
 class ActivityItem extends React.Component {
@@ -114,7 +120,7 @@ class ActivityList extends React.Component {
 			// this.state.items.forEach((item) => {
 			// 	rows.push(<ActivityItem activityText={item.activity_text} lastTime={item.last_time} pk={item.pk} ></ActivityItem>);
 			// });
-			return (<>{this.state.items.map((item, index) => <ActivityItem activityText={item.activity_text} lastTime={item.last_checkin} nextTime={item.next_checkin} pk={item.pk} key={index} ></ActivityItem>)}</>)
+			return (<>{this.state.items.map((item, index) => <ActivityItem activityText={item.activity_text} lastTime={item.last_checkin} nextTime={item.next_checkin} pk={item.pk} key={item.pk} ></ActivityItem>)}</>)
 		} else {
 			return (<div>Loading..</div>)
 		}
@@ -125,16 +131,19 @@ class ActivityList extends React.Component {
 	pollData () {
 		window.fetch('/api/category.json/' + this.state.category + '?' + Date.now())
 		  .then(response => response.json())
-		  .then(items => this.setState({ items }));
+		  .then(items => {
+				// items.sort((a,b) => (a.next_checkin > b.next_checkin) ? 1 : -1);
+				items.sort((a,b) => a.next_checkin - b.next_checkin);
+				console.log(items);
+				this.setState({ items })
+		  });
 	}
 
 	componentDidMount() {
 		this.pollData();
 		this.intervalID = setInterval(() => this.pollData(), 5000);
-		console.log
 	}
 	componentWillUnmount() {
-		console.log('unmounting ', this.intervalID);
 		clearInterval(this.intervalID);
 	}
 }
@@ -171,8 +180,6 @@ class CategoryList extends React.Component {
 	}
 
 	
-
-
 	render () {
 		if (this.state.categories.length > 0) {
 			return (<>{this.state.categories.map((item, index) => <CategoryItem pk={item.pk} name={item.name} key={item.pk} handleCategorySelect={this.handleCategorySelect}></CategoryItem>)}</>)
@@ -182,7 +189,7 @@ class CategoryList extends React.Component {
 	}
 
 	pollData () {
-		window.fetch('/api/get_categories')
+		window.fetch('/api/get_categories?' + Date.now())
 		  .then(response => response.json())
 		  .then(categories => this.setState({ categories }));
 	}
@@ -287,7 +294,7 @@ class WeatherView extends React.Component {
 	}
 
 	pollData () {
-		window.fetch('/api/get_data')
+		window.fetch('/api/get_data?' + Date.now())
 		  .then(response => response.json())
 		  .then(data => this.setState({ 
 			  data,
@@ -311,6 +318,7 @@ class HeaderView extends React.Component {
 		super(props)
 
 		this.handleCategorySelect = this.handleCategorySelect.bind(this);
+		this.showLights = this.showLights.bind(this);
 		this.backButton = this.backButton.bind(this);
 	}
 
@@ -318,9 +326,15 @@ class HeaderView extends React.Component {
 		this.props.handleCategorySelect(null);
 	}
 
+	showLights() {
+		this.props.showLights();
+	}
+
 	backButton() {
 		if (this.props.hasCategory) {
 			return (<div className="button" onClick={this.handleCategorySelect}>Back</div>)
+		} else {
+			return (<div className="button grey-button" onClick={this.showLights}><FontAwesomeIcon icon={faLightbulb}></FontAwesomeIcon></div>)
 		}
 	}
 
@@ -339,15 +353,135 @@ class HeaderView extends React.Component {
 }
 
 
+class LightButton extends React.Component {
+	constructor(props) {
+		super(props);
+
+		this.state = {
+			pending: false
+		}
+
+		this.getLogo = this.getLogo.bind(this);
+		this.pollData = this.pollData.bind(this);
+		this.getClass = this.getClass.bind(this);
+		this.switchLight = this.switchLight.bind(this);
+	}
+
+	getLogo() {
+		if (this.props.status) {
+			return (<FontAwesomeIcon icon={faLightbulbOn} />);
+		} else {
+			return (<FontAwesomeIcon icon={faLightbulbSlash} />);
+		}
+	}
+
+	getClass() {
+		let className = 'item';
+		if (this.state.pending) {
+			className += ' pulseBox';
+		}
+		if (this.props.status) {
+			className += ' light-on';
+		}
+
+		return className;
+	}
+
+	pollData() {
+		this.props.pollData();
+	}
+
+	switchLight() {
+		this.setState({pending: true});
+		window.fetch('/api/set_lights', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+
+			},
+			body: JSON.stringify({
+				name: this.props.name,
+				action: !this.props.status
+			})
+		}).then(response => {
+			this.pollData();
+			this.setState({pending: false});
+		});
+	}
+
+	render () {
+		if (this.props.friendlyName != ""){
+			return (<div className={this.getClass()} onClick={this.switchLight}>
+				<div>{this.getLogo()}</div>
+				<div>{this.props.friendlyName}</div>
+			</div>);
+		} else {
+			return (<></>);
+		}
+	}
+}
+
+class LightControlView extends React.Component {
+	constructor(props) {
+		super(props);
+
+		this.intervalID = 0;
+		
+		this.state = {
+			lights: []
+		}
+
+		this.pollData = this.pollData.bind(this);
+	}
+
+	render () {
+		if (this.state.lights.length > 0) {
+			return (<>{this.state.lights.map((item, index) => <LightButton name={item.name} friendlyName={item.friendlyName} key={item.name} pollData={this.pollData} status={item.status}></LightButton>)}</>)
+		} else {
+			return (<div>Loading..</div>)
+		}
+	}
+
+	pollData () {
+		window.fetch('/api/get_lights?' + Date.now())
+		  .then(response => response.json())
+		  .then(lights => this.setState({ lights }));
+	}
+
+	componentDidMount() {
+		this.pollData();
+		this.intervalID = setInterval(() => this.pollData(), 5000);
+	}
+
+	componentWillUnmount() {
+		clearInterval(this.intervalID);
+	}
+}
+
+
+class SensorGraph extends React.Component {
+	constructor(props) {
+		super(props);
+	}
+
+	
+
+
+}
+
+
+
 class ActivityView extends React.Component {
 	constructor(props) {
 		super(props);
 
 		this.state = {
 			selectedCategory: null,
-			advancedView: false
+			advancedView: false,
+			showLights: false
 		};
 		this.handleCategorySelect = this.handleCategorySelect.bind(this);
+		this.showLights = this.showLights.bind(this);
 	}
 
 	containerClass () {
@@ -355,36 +489,31 @@ class ActivityView extends React.Component {
 	}
 
 	handleCategorySelect (category) {
-		this.setState({selectedCategory: category});
+		this.setState({selectedCategory: category, showLights: false});
+	}
+
+	showLights () {
+		this.setState({showLights: true});
 	}
 
 	render () {
-		if (this.state.selectedCategory !== null) {
+		if (this.state.showLights) {
 			return (<div>
-				<HeaderView hasCategory={true} handleCategorySelect={this.handleCategorySelect}></HeaderView>
+				<HeaderView hasCategory={true} handleCategorySelect={this.handleCategorySelect} showLights={this.showLights}></HeaderView>
+				<div className={this.containerClass()}><LightControlView lights={[]} key='lights'></LightControlView></div>
+			</div>)
+		}
+		else if (this.state.selectedCategory !== null) {
+			return (<div>
+				<HeaderView hasCategory={true} handleCategorySelect={this.handleCategorySelect} showLights={this.showLights}></HeaderView>
 				<div className={this.containerClass()}><ActivityList items={[]} key={this.state.selectedCategory} category={this.state.selectedCategory}></ActivityList></div>
 			</div>)
 		} else {
 			return (<div>
-				<HeaderView hasCategory={false} ></HeaderView>
+				<HeaderView hasCategory={false}  showLights={this.showLights}></HeaderView>
 				<div className={this.containerClass()}><CategoryList categories={[]} handleCategorySelect={this.handleCategorySelect}></CategoryList></div>
 			</div>)
 		}
-	}
-}
-
-class LightButton extends React.Component {
-
-}
-
-class LightControlView extends React.Component {
-	constructor(props) {
-		super(props);
-	}
-
-
-	render () {
-		return (<div></div>);
 	}
 }
 
