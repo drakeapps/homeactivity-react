@@ -17,26 +17,26 @@ module.exports = {
         test: /\.js$/,
         exclude: /node_modules/,
         use: {
-		  loader: "babel-loader",
-		  options: {
-			"presets": [
-				"@babel/preset-react",
-				["@babel/preset-env", {
-					"debug" : true,
-					"useBuiltIns": "entry"
-				}
-				],
-			  ],
-		  }
+          loader: "babel-loader",
+          options: {
+            "presets": [
+              "@babel/preset-react",
+              ["@babel/preset-env", {
+                "debug": true,
+                "useBuiltIns": "entry"
+              }
+              ],
+            ],
+          }
         }
-	  }, 
-	  {
-		test:/\.(s*)css$/,
-		use:['style-loader','css-loader', 'sass-loader']
-	 }
+      },
+      {
+        test: /\.(s*)css$/,
+        use: ['style-loader', 'css-loader', 'postcss-loader', 'sass-loader']
+      }
     ]
   },
-  plugins: [ 
+  plugins: [
     new CleanWebpackPlugin(),
     new HtmlWebpackPlugin({
       inject: false,
@@ -44,12 +44,12 @@ module.exports = {
       template: './src/index.html',
       filename: 'index.html'
     }),
-	new WebpackMd5Hash(),
-	new MiniCssExtractPlugin({
-		// Options similar to the same options in webpackOptions.output
-		// both options are optional
-		filename: '[name].css',
-		chunkFilename: '[id].css',
-	})
+    new WebpackMd5Hash(),
+    new MiniCssExtractPlugin({
+      // Options similar to the same options in webpackOptions.output
+      // both options are optional
+      filename: '[name].css',
+      chunkFilename: '[id].css',
+    })
   ]
 };

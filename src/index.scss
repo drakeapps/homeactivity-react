@@ -3,32 +3,43 @@
 
 $screen-small: 1023px;
 
+// colors with opacity
+@function bad-alpha($opacity:1.0) {
+	@return rgba(255, 65, 54, $opacity)
+};
+@function soon-alpha($opacity:1.0) {
+	@return rgba(255, 133, 27, $opacity)
+};
+@function good-alpha($opacity: 1.0) {
+	@return rgba(46, 204, 64, $opacity)
+}
+@function yellow-alpha($opacity: 1.0) {
+	@return rgba(255, 220, 00, $opacity);
+}
+
+// colors
+$light-blue: #0074D9;
+$light-grey: #eee;
+$white: #fff;
+$bad: bad-alpha(1.0);
+$soon: soon-alpha(1.0);
+$good: good-alpha(1.0);
+$yellow: yellow-alpha(1.0);
+
+
+
 body {
 	/* width: 100%; */
 	font-family: Helvetica, sans-serif, sans;
 }
 
-@-webkit-keyframes shadow-pulse
-{
-     0% {
-          -webkit-box-shadow: 0 0 0 0px rgba(0, 0, 0, 0.2);
-                  box-shadow: 0 0 0 0px rgba(0, 0, 0, 0.2);
-     }
-     100% {
-          -webkit-box-shadow: 0 0 0 35px rgba(0, 0, 0, 0);
-                  box-shadow: 0 0 0 35px rgba(0, 0, 0, 0);
-     }
-}
-
 @keyframes shadow-pulse
 {
      0% {
-          -webkit-box-shadow: 0 0 0 0px rgba(0, 0, 0, 0.2);
-                  box-shadow: 0 0 0 0px rgba(0, 0, 0, 0.2);
+		box-shadow: 0 0 0 0px rgba(0, 0, 0, 0.2);
      }
      100% {
-          -webkit-box-shadow: 0 0 0 35px rgba(0, 0, 0, 0);
-                  box-shadow: 0 0 0 35px rgba(0, 0, 0, 0);
+        box-shadow: 0 0 0 35px rgba(0, 0, 0, 0);
      }
 }
 
@@ -41,8 +52,6 @@ body {
 	grid-auto-rows: 100px;
 	grid-gap: 20px;
 	justify-items: center;
-	-webkit-box-align: center;
-	-ms-flex-align: center;
 	align-items: center;
 
 	@media screen and (max-width: $screen-small) {
@@ -51,20 +60,14 @@ body {
 	}
 
 	.item {
-		display: -webkit-box;
-		display: -ms-flexbox;
 		display: flex;
 		text-align: center;
 		width: 100%;
 		height: 100%;
-		background-color: #eee;
+		background-color: $light-grey;
 		cursor: pointer;
-		-webkit-box-align: center;
-			-ms-flex-align: center;
-				align-items: center;
-		-webkit-box-pack: center;
-			-ms-flex-pack: center;
-				justify-content: center;
+		align-items: center;
+		justify-content: center;
 		border-radius: 3px;
 	}
 	
@@ -73,22 +76,21 @@ body {
 	}
 	
 	.bad {
-		background-color: rgba(255, 65, 54, 0.75);
+		background-color: bad-alpha(0.75);
 	}
 	.soon {
-		background-color: rgba(255, 133, 27, 0.75);
+		background-color: soon-alpha(0.75);
 	}
 	.good {
-		background-color: rgba(46, 204, 64, 0.75);
+		background-color: good-alpha(0.75);
 	}
 
 	.light-on {
-		background-color: rgba(255, 220, 00, 0.75);
+		background-color: yellow-alpha(0.75);
 	}
 	
 	.pulseBox {
-		-webkit-animation: shadow-pulse 1s infinite;
-				animation: shadow-pulse 1s infinite;
+		animation: shadow-pulse 1s infinite;
 	}
 	
 }
@@ -106,12 +108,8 @@ body {
 		display: inline-block;
 		background-color: #eee;
 		cursor: pointer;
-		-webkit-box-align: center;
-			-ms-flex-align: center;
-				align-items: center;
-		-webkit-box-pack: center;
-			-ms-flex-pack: center;
-				justify-content: center;
+		align-items: center;
+		justify-content: center;
 		border-radius: 3px;
 		text-align: center;
 	}
@@ -237,29 +235,19 @@ body {
 	.clock {
 		font-size: 40px;
 		text-align: center;
-		-webkit-box-align: center;
-			-ms-flex-align: center;
-				align-items: center;
-		-webkit-box-pack: center;
-			-ms-flex-pack: center;
-				justify-content: center;
+		align-items: center;
+		justify-content: center;
 	}
 	
 	.headerLeft {
 		text-align: left;
-		-webkit-box-align: start;
-			-ms-flex-align: start;
-				align-items: flex-start;
-		-webkit-box-pack: start;
-			-ms-flex-pack: start;
-				justify-content: flex-start;
+		align-items: flex-start;
+		justify-content: flex-start;
 	}
 	
 	.weather {
 		text-align: right;
-		-webkit-box-pack: center;
-			-ms-flex-pack: center;
-				justify-content: center;
+		justify-content: center;
 		font-size: 20px;
 
 		@media screen and (max-width: $screen-small) {
@@ -276,12 +264,8 @@ body {
 		cursor: pointer;
 		padding: 12px 25px;
 		text-align: center;
-		-webkit-box-align: center;
-			-ms-flex-align: center;
-				align-items: center;
-		-webkit-box-pack: center;
-			-ms-flex-pack: center;
-				justify-content: center;
+		align-items: center;
+		justify-content: center;
 		background-color: #0074D9;
 		color: #fff;
 		font-weight: bold;
@@ -306,38 +290,24 @@ body {
 	.clock {
 		font-size: 40px;
 		text-align: center;
-		-webkit-box-align: center;
-			-ms-flex-align: center;
-				align-items: center;
-		-webkit-box-pack: center;
-			-ms-flex-pack: center;
-				justify-content: center;
+		align-items: center;
+		justify-content: center;
 	}
 	
 	.headerLeft {
 		text-align: left;
-		-webkit-box-align: start;
-			-ms-flex-align: start;
-				align-items: flex-start;
-		-webkit-box-pack: start;
-			-ms-flex-pack: start;
-				justify-content: flex-start;
+		align-items: flex-start;
+		justify-content: flex-start;
 	}
 	
 	.weather {
 		text-align: right;
-		-webkit-box-pack: center;
-			-ms-flex-pack: center;
-				justify-content: center;
+		justify-content: center;
 		font-size: 20px;
 
 		@media screen and (max-width: $screen-small) {
-			display: -webkit-box;
-			display: -ms-flexbox;
 			display: flex;
-			-webkit-box-pack: justify;
-			    -ms-flex-pack: justify;
-			        justify-content: space-between;
+			justify-content: space-between;
 			div {
 				text-align: center;
 			}
@@ -349,14 +319,10 @@ body {
 		cursor: pointer;
 		padding: 12px 25px;
 		text-align: center;
-		-webkit-box-align: center;
-			-ms-flex-align: center;
-				align-items: center;
-		-webkit-box-pack: center;
-			-ms-flex-pack: center;
-				justify-content: center;
-		background-color: #0074D9;
-		color: #fff;
+		align-items: center;
+		justify-content: center;
+		background-color: $light-blue;
+		color: $white;
 		font-weight: bold;
 		border-radius: 3px;
 	}
@@ -372,4 +338,28 @@ body {
 }.header > *:nth-child(3) {
 	-ms-grid-row: 1;
 	-ms-grid-column: 5;
+}
+
+
+
+.sensor-container {
+
+	display: flex;
+
+	.sensor-graph, .sensor-labels {
+		display: flex;
+		justify-content: center;
+		flex-direction: column;
+		width: 125px;
+	}
+
+	.sensor-title {
+		font-size: 125%;
+	}
+
+	.sensor-temp {
+		&.hot {
+			color: bad-alpha(1.0);
+		}
+	}
 }

@@ -7,7 +7,7 @@ import humanizeDuration from 'humanize-duration';
 import moment from 'moment';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faLightbulbSlash, faLightbulbOn, faLightbulb } from '@fortawesome/pro-light-svg-icons';
-import {XYPlot, XAxis, YAxis, HorizontalGridLines, LineSeries} from 'react-vis';
+import {XYPlot, XAxis, YAxis, HorizontalGridLines, VerticalGridLines, LineSeries} from 'react-vis';
 
 
 
@@ -19,10 +19,10 @@ class ActivityItem extends React.Component {
 		super(props)
 
 		this.state = {
-			pk: props.pk,
+			pk: this.props.pk,
 			pending: false,
-			lastTime: props.lastTime,
-			nextTime: props.nextTime
+			lastTime: this.props.lastTime,
+			nextTime: this.props.nextTime
 		}
 	}
 
@@ -87,10 +87,20 @@ class ActivityItem extends React.Component {
 			this.setState({pending: false, lastTime: json['time'], nextTime: json['next_time']});
 		});
 	}
+	componentWillReceiveProps(nextProps) {
+		if(this.props != nextProps) {
+			this.setState({
+				pk: nextProps.pk,
+				pending: false,
+				lastTime: nextProps.lastTime,
+				nextTime: nextProps.nextTime
+			});
+		}
+	}
 
 	render () {
 		return (
-			<div className={this.getStatusClass()} id={this.state.pk} key={this.props.pk} onClick={(e) => this.markDone(this, e)}>
+			<div className={this.getStatusClass()} id={'activityItem' + this.state.pk} key={this.props.pk} onClick={(e) => this.markDone(this, e)}>
 				<div className="item-content">
 					<div className="title">{this.props.activityText}</div>
 					<div>{this.getLastDate()}</div>
@@ -294,7 +304,7 @@ class WeatherView extends React.Component {
 	}
 
 	pollData () {
-		window.fetch('/api/get_data?' + Date.now())
+		window.fetch('/api/get_data?simple=true&' + Date.now())
 		  .then(response => response.json())
 		  .then(data => this.setState({ 
 			  data,
@@ -462,13 +472,87 @@ class LightControlView extends React.Component {
 class SensorGraph extends React.Component {
 	constructor(props) {
 		super(props);
+
+		this.handleData = this.handleData.bind(this);
 	}
 
-	
+	// returns x/y pairing based on the type of data requested
+	handleData (type) {
+		let data = [];
+		console.log(type);
+
+		this.props.data.forEach((item) => {
+			data.push({
+				x: moment.unix(item['time']),
+				y: item[type]
+			});
+		});
+		console.log(data);
+		return data;
+	}
+
+	render() {
+		console.log('rendering graph');
+		return (<div className="sensor-container">
+			<div className="sensor-labels">
+				<div className="sensor-title">{this.props.friendlyName}</div>
+				<div className="sensor-temp">{this.props.temp.toFixed(2)}&deg;F</div>
+				<div className="sensor-humidity">{this.props.humidity.toFixed(1)}%</div>
+			</div>
+			<div className="sensor-graph">
+				<XYPlot height={200} width= {window.innerWidth - 150} xType="time">
+					<VerticalGridLines />
+					<HorizontalGridLines />
+					<XAxis />
+					<YAxis />
+					<LineSeries data={this.handleData('humidity')} stroke="blue" />
+					<LineSeries data={this.handleData('temp')} stroke="red" />
+				</XYPlot>
+			</div>
+		</div>);
+	}
 
 
 }
 
+class SensorContainer extends React.Component {
+	constructor(props) {
+		super(props);
+
+		this.state = {
+			data: []
+		}
+
+		this.intervalID = 0;
+	}
+
+	pollData () {
+		window.fetch('/api/get_data?' + Date.now())
+		  .then(response => response.json())
+		  .then(data => this.setState({ 
+			  data
+			}));
+	}
+
+	componentDidMount() {
+		this.pollData();
+		this.intervalID = setInterval(() => this.pollData(), 30000);
+	}
+	componentWillUnmount() {
+		clearInterval(this.intervalID);
+	}
+
+	render() {
+		if (Object.keys(this.state.data).length > 0) {
+			return (<div>
+				{Object.entries(this.state.data).map((key) => <SensorGraph data={key[1].historical} key={key[0]} friendlyName={key[1].friendlyName} humidity={key[1].humidity} temp={key[1].temp}></SensorGraph>)}
+			</div>)
+		} else {
+			return (<div>Loading..</div>);
+		}
+		
+	}
+}
 
 
 class ActivityView extends React.Component {
@@ -478,7 +562,8 @@ class ActivityView extends React.Component {
 		this.state = {
 			selectedCategory: null,
 			advancedView: false,
-			showLights: false
+			showLights: false,
+			showSensors: false
 		};
 		this.handleCategorySelect = this.handleCategorySelect.bind(this);
 		this.showLights = this.showLights.bind(this);
@@ -489,15 +574,24 @@ class ActivityView extends React.Component {
 	}
 
 	handleCategorySelect (category) {
-		this.setState({selectedCategory: category, showLights: false});
+		this.setState({selectedCategory: category, showLights: false, showSensors: false});
 	}
 
 	showLights () {
 		this.setState({showLights: true});
 	}
 
+	showSensors() {
+		this.setState({showSensors: true});
+	}
+
 	render () {
-		if (this.state.showLights) {
+		if (this.state.showSensors) {
+			return (<div>
+				<HeaderView hasCategory={true} handleCategorySelect={this.handleCategorySelect} showLights={this.showLights}></HeaderView>
+				<SensorContainer></SensorContainer>
+			</div>)
+		} else if (this.state.showLights) {
 			return (<div>
 				<HeaderView hasCategory={true} handleCategorySelect={this.handleCategorySelect} showLights={this.showLights}></HeaderView>
 				<div className={this.containerClass()}><LightControlView lights={[]} key='lights'></LightControlView></div>

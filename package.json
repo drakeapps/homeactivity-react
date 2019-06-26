@@ -10,7 +10,8 @@
 	},
 	"author": "",
 	"license": "ISC",
-	"devDependencies": {
+	"devDependencies": {},
+	"dependencies": {
 		"@babel/cli": "^7.4.4",
 		"@babel/core": "^7.4.5",
 		"@babel/plugin-transform-regenerator": "^7.4.5",
@@ -19,6 +20,15 @@
 		"@babel/register": "^7.4.4",
 		"@babel/runtime": "^7.4.5",
 		"@fortawesome/fontawesome-pro": "^5.9.0",
+		"@fortawesome/fontawesome-svg-core": "^1.2.19",
+		"@fortawesome/free-brands-svg-icons": "^5.9.0",
+		"@fortawesome/free-regular-svg-icons": "^5.9.0",
+		"@fortawesome/free-solid-svg-icons": "^5.9.0",
+		"@fortawesome/pro-light-svg-icons": "^5.9.0",
+		"@fortawesome/pro-regular-svg-icons": "^5.9.0",
+		"@fortawesome/pro-solid-svg-icons": "^5.9.0",
+		"@fortawesome/react-fontawesome": "^0.1.4",
+		"autoprefixer": "^9.6.0",
 		"babel-loader": "^8.0.6",
 		"clean-webpack-plugin": "^2",
 		"core-js": "^2.6.9",
@@ -28,8 +38,10 @@
 		"mini-css-extract-plugin": "^0.7.0",
 		"moment": "^2.24.0",
 		"node-sass": "",
+		"postcss-loader": "^3.0.0",
 		"react": "^16.8.6",
 		"react-dom": "^16.8.6",
+		"react-vis": "^1.11.7",
 		"regenerator-runtime": "^0.13.2",
 		"sass-loader": "^7",
 		"style-loader": "^0.23.1",
@@ -37,16 +49,5 @@
 		"webpack-cli": "^3.3.4",
 		"webpack-md5-hash": "0.0.6",
 		"whatwg-fetch": "^3.0.0"
-	},
-	"dependencies": {
-		"@fortawesome/fontawesome-svg-core": "^1.2.19",
-		"@fortawesome/free-brands-svg-icons": "^5.9.0",
-		"@fortawesome/free-regular-svg-icons": "^5.9.0",
-		"@fortawesome/free-solid-svg-icons": "^5.9.0",
-		"@fortawesome/pro-light-svg-icons": "^5.9.0",
-		"@fortawesome/pro-regular-svg-icons": "^5.9.0",
-		"@fortawesome/pro-solid-svg-icons": "^5.9.0",
-		"@fortawesome/react-fontawesome": "^0.1.4",
-		"react-vis": "^1.11.7"
 	}
 }
