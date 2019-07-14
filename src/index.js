@@ -3,7 +3,7 @@ import "@babel/polyfill";
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import 'whatwg-fetch';
-import humanizeDuration from 'humanize-duration';
+// import humanizeDuration from 'humanize-duration';
 import moment from 'moment';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faLightbulbSlash, faLightbulbOn, faLightbulb } from '@fortawesome/pro-light-svg-icons';
@@ -85,6 +85,9 @@ class ActivityItem extends React.Component {
 			return response.json();
 		}).then(json => {
 			this.setState({pending: false, lastTime: json['time'], nextTime: json['next_time']});
+		},
+		(error) => {
+			console.log(error);
 		});
 	}
 	componentWillReceiveProps(nextProps) {
@@ -141,11 +144,13 @@ class ActivityList extends React.Component {
 	pollData () {
 		window.fetch('/api/category.json/' + this.state.category + '?' + Date.now())
 		  .then(response => response.json())
-		  .then(items => {
+		  .then((items) => {
 				// items.sort((a,b) => (a.next_checkin > b.next_checkin) ? 1 : -1);
 				items.sort((a,b) => a.next_checkin - b.next_checkin);
-				console.log(items);
 				this.setState({ items })
+		  },
+		  (error) => {
+			  console.log('request failed');
 		  });
 	}
 
@@ -201,7 +206,10 @@ class CategoryList extends React.Component {
 	pollData () {
 		window.fetch('/api/get_categories?' + Date.now())
 		  .then(response => response.json())
-		  .then(categories => this.setState({ categories }));
+		  .then(categories => this.setState({ categories }),
+		  (error) => {
+			  console.log(error);
+		  });
 	}
 
 	componentDidMount() {
@@ -309,7 +317,10 @@ class WeatherView extends React.Component {
 		  .then(data => this.setState({ 
 			  data,
 			  total: Object.keys(this.state.data).filter(key => key !== 'weather').length
-			}));
+			}),
+			(error) => {
+				console.log(error);
+			});
 	}
 
 	componentDidMount() {
@@ -341,7 +352,7 @@ class HeaderView extends React.Component {
 	}
 
 	backButton() {
-		if (this.props.hasCategory) {
+		if (this.props.showBackButton) {
 			return (<div className="button" onClick={this.handleCategorySelect}>Back</div>)
 		} else {
 			return (<div className="button grey-button" onClick={this.showLights}><FontAwesomeIcon icon={faLightbulb}></FontAwesomeIcon></div>)
@@ -416,6 +427,9 @@ class LightButton extends React.Component {
 		}).then(response => {
 			this.pollData();
 			this.setState({pending: false});
+		},
+		(error) => {
+			console.log(error);
 		});
 	}
 
@@ -455,7 +469,10 @@ class LightControlView extends React.Component {
 	pollData () {
 		window.fetch('/api/get_lights?' + Date.now())
 		  .then(response => response.json())
-		  .then(lights => this.setState({ lights }));
+		  .then(lights => this.setState({ lights }),
+		  (error) => {
+			  console.log(error);
+		  });
 	}
 
 	componentDidMount() {
@@ -531,7 +548,10 @@ class SensorContainer extends React.Component {
 		  .then(response => response.json())
 		  .then(data => this.setState({ 
 			  data
-			}));
+			}),
+			(error) => {
+				console.log(error);
+			});
 	}
 
 	componentDidMount() {
@@ -586,31 +606,94 @@ class ActivityView extends React.Component {
 	}
 
 	render () {
+		const header = 
+			<HeaderView 
+				showBackButton={(this.state.showSensors || this.state.showLights || this.state.selectedCategory !== null)} 
+				handleCategorySelect={this.handleCategorySelect} showLights={this.showLights}>
+			</HeaderView>;
+
+		let content = null;
+
 		if (this.state.showSensors) {
-			return (<div>
-				<HeaderView hasCategory={true} handleCategorySelect={this.handleCategorySelect} showLights={this.showLights}></HeaderView>
+			content = (<div>
 				<SensorContainer></SensorContainer>
 			</div>)
 		} else if (this.state.showLights) {
-			return (<div>
-				<HeaderView hasCategory={true} handleCategorySelect={this.handleCategorySelect} showLights={this.showLights}></HeaderView>
+			content = (<div>
 				<div className={this.containerClass()}><LightControlView lights={[]} key='lights'></LightControlView></div>
 			</div>)
 		}
 		else if (this.state.selectedCategory !== null) {
-			return (<div>
-				<HeaderView hasCategory={true} handleCategorySelect={this.handleCategorySelect} showLights={this.showLights}></HeaderView>
+			content = (<div>
 				<div className={this.containerClass()}><ActivityList items={[]} key={this.state.selectedCategory} category={this.state.selectedCategory}></ActivityList></div>
 			</div>)
 		} else {
-			return (<div>
-				<HeaderView hasCategory={false}  showLights={this.showLights}></HeaderView>
+			content = (<div>
 				<div className={this.containerClass()}><CategoryList categories={[]} handleCategorySelect={this.handleCategorySelect}></CategoryList></div>
 			</div>)
 		}
+
+		return (<div>{header}{content}</div>);
 	}
 }
 
 
-ReactDOM.render(<ActivityView></ActivityView>, document.getElementById('app'));
+class HomeScreenView extends React.Component {
+	constructor (props) {
+		super(props);
+	}
+
+
+
+	render() {
+		return <div className="homescreen-container">
+			<div className="left-rail">
+				<div className="activity-container">
+					<div className="activity-item">Test1</div>
+					<div className="activity-item">Test2</div>
+					<div className="activity-item">Test3</div>
+					<div className="activity-item">Test4</div>
+					<div className="activity-item">Test5</div>
+				</div>
+				
+			</div>
+			<div className="center-rail">
+				<div className="weather-outside">
+					<div className="weather-icon"></div>
+					<div className="weather-temp">76 &deg;F - 75% Humidity</div>
+					<div className="weather-forecast">Sunny</div>
+					<div className="weather-lastupdate">a few seconds ago</div>
+				</div>
+				<div className="clock">12:00 AM</div>
+				<div className="sensors-container">
+					<div className="sensor-item">
+						<div className="sensor-name">Garage</div>
+						<div className="sensor-data">80 &deg;F - 80% Humidity</div>
+					</div>
+					<div className="sensor-item">
+						<div className="sensor-name">Garage Attic</div>
+						<div className="sensor-data">80 &deg;F - 80% Humidity</div>
+					</div>
+					<div className="sensor-item">
+						<div className="sensor-name">Attic</div>
+						<div className="sensor-data">80 &deg;F - 80% Humidity</div>
+					</div>
+				</div>
+			</div>
+			<div className="right-rail">
+				<div className="lights-container">
+					<div className="light-container on">
+						Living Room
+					</div>
+					<div className="light-container off">
+						Kitchen
+					</div>
+				</div>
+			</div>
+		</div>;
+	}
+}
+
+// ReactDOM.render(<ActivityView></ActivityView>, document.getElementById('app'));
+ReactDOM.render(<HomeScreenView></HomeScreenView>, document.getElementById('app'));
 

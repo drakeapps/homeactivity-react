@@ -363,3 +363,77 @@ body {
 		}
 	}
 }
+
+
+.homescreen-container {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-direction: row;
+	width: 100%;
+
+	.left-rail {
+		width: 30%;
+
+
+		display: flex;
+		flex-direction: column;
+
+		.activity-container {
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
+
+			.activity-item {
+				width: 100%;
+				min-height: 40px;
+				background-color: bad-alpha(0.75);
+				border-radius: 3px;
+				cursor: pointer;
+				margin: 10px;
+				display: flex;
+
+				justify-content: center;
+				align-items: center;
+
+
+			}
+		}
+	}
+
+	.center-rail {
+		width: 40%;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		text-align: center;
+
+
+		.weather-outside {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			.weather-icon {
+				height: 150px;
+				width: 150px;
+				background-color: red;
+				margin-bottom: 5px;
+			}
+		}
+	}
+
+	.right-rail {
+		width: 30%;
+
+		.lights-container {
+			display: flex;
+			flex-direction: column;
+			align-items: flex-end;
+		}
+		
+	}
+
+
+}
