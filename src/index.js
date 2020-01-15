@@ -695,5 +695,5 @@ class HomeScreenView extends React.Component {
 }
 
 // ReactDOM.render(<ActivityView></ActivityView>, document.getElementById('app'));
-ReactDOM.render(<HomeScreenView></HomeScreenView>, document.getElementById('app'));
+ReactDOM.render(<ActivityView></ActivityView>, document.getElementById('app'));
 

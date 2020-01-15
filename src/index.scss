@@ -31,6 +31,7 @@ $yellow: yellow-alpha(1.0);
 body {
 	/* width: 100%; */
 	font-family: Helvetica, sans-serif, sans;
+	background-color: black;
 }
 
 @keyframes shadow-pulse
@@ -226,6 +227,7 @@ body {
 	-ms-grid-rows: 40px;
 	grid-template-rows: 40px;
 	grid-gap: 1%;
+	color: white;
 
 	@media screen and (max-width: $screen-small) {
 		grid-template-columns: 100%;
