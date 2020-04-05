@@ -5,6 +5,7 @@
 	"main": "index.js",
 	"scripts": {
 		"build": "webpack --mode production",
+		"verbose": "webpack --mode production --display-modules",
 		"dev": "webpack --mode development",
 		"watch": "webpack --mode development --watch"
 	},
@@ -30,6 +31,7 @@
 		"@fortawesome/react-fontawesome": "^0.1.4",
 		"autoprefixer": "^9.6.0",
 		"babel-loader": "^8.0.6",
+		"bootstrap": "^4.3.1",
 		"clean-webpack-plugin": "^2",
 		"core-js": "^2.6.9",
 		"css-loader": "^3",
