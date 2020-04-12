@@ -11,7 +11,9 @@
 	},
 	"author": "",
 	"license": "ISC",
-	"devDependencies": {},
+	"devDependencies": {
+		"dart-sass": "^1.25.0"
+	},
 	"dependencies": {
 		"@babel/cli": "^7.4.4",
 		"@babel/core": "^7.4.5",
