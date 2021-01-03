@@ -6,7 +6,8 @@ import 'whatwg-fetch';
 // import humanizeDuration from 'humanize-duration';
 import moment from 'moment';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faLightbulbSlash, faLightbulbOn, faLightbulb } from '@fortawesome/pro-light-svg-icons';
+import { faLightbulb } from '@fortawesome/free-regular-svg-icons';
+// import { faLightbulbSlash, faLightbulbOn, faLightbulb } from '@fortawesome/pro-light-svg-icons';
 import {XYPlot, XAxis, YAxis, HorizontalGridLines, VerticalGridLines, LineSeries} from 'react-vis';
 
 
@@ -390,9 +391,9 @@ class LightButton extends React.Component {
 
 	getLogo() {
 		if (this.props.status) {
-			return (<FontAwesomeIcon icon={faLightbulbOn} />);
+			return (<FontAwesomeIcon icon={faLightbulb} />);
 		} else {
-			return (<FontAwesomeIcon icon={faLightbulbSlash} />);
+			return (<FontAwesomeIcon icon={faLightbulb} />);
 		}
 	}
 
