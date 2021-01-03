@@ -22,7 +22,6 @@
 		"@babel/preset-react": "^7.0.0",
 		"@babel/register": "^7.4.4",
 		"@babel/runtime": "^7.4.5",
-		"@fortawesome/fontawesome-pro": "^5.9.0",
 		"@fortawesome/fontawesome-svg-core": "^1.2.19",
 		"@fortawesome/free-brands-svg-icons": "^5.9.0",
 		"@fortawesome/free-regular-svg-icons": "^5.9.0",
