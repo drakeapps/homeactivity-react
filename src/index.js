@@ -132,28 +132,12 @@ class ActivityList extends React.Component {
 	render () {
 		const rows = [];
 		if (this.state.items.length > 0){
-			// this.state.items.forEach((item) => {
-			// 	rows.push(<ActivityItem activityText={item.activity_text} lastTime={item.last_time} pk={item.pk} ></ActivityItem>);
-			// });
-			return (<>{this.state.items.map((item, index) => <ActivityItem activityText={item.activity_text} lastTime={item.last_checkin} nextTime={item.next_checkin} pk={item.pk} key={item.pk} ></ActivityItem>)}</>)
+			return (<>{this.state.items.map((item, index) => (this.state.category === 0 || this.state.category === item.category) ? <ActivityItem activityText={item.activity_text} lastTime={item.last_checkin} nextTime={item.next_checkin} pk={item.pk} key={item.pk} ></ActivityItem> : <></>)}</>)
 		} else {
 			return (<div>Loading..</div>)
 		}
 
 		// return (<div className="container">{rows.map(item => <React.Fragment>{item}</React.Fragment>)}</div>)
-	}
-
-	pollData () {
-		window.fetch('/api/category.json/' + this.state.category + '?' + Date.now())
-		  .then(response => response.json())
-		  .then((items) => {
-				// items.sort((a,b) => (a.next_checkin > b.next_checkin) ? 1 : -1);
-				items.sort((a,b) => a.next_checkin - b.next_checkin);
-				this.setState({ items })
-		  },
-		  (error) => {
-			  console.log('request failed');
-		  });
 	}
 
 	handleMessage (data) {
@@ -194,7 +178,15 @@ class ActivityList extends React.Component {
 
 		this.ws.onclose = (event) => {
 			console.log(`websocket connection closed`);
-			// ideally try to reconnect
+			// wait 5 seconds
+			// attempt to reconnect, otherwise reload
+			setTimeout(() => {
+				try {
+					this.ws = new WebSocket(`wss://dashsocket.xrho.com`);
+				} catch (error) {
+					location.reload();
+				}
+			}, 5000);
 		};
 
 		this.ws.onmessage = (event) => {
