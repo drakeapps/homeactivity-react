@@ -157,9 +157,11 @@ class ActivityList extends React.Component {
 	}
 
 	handleMessage (data) {
+		console.log(data);
 		const items = this.state.items;
 		data.forEach((item) => {
 			let foundItem = false;
+			console.log(item);
 			items = items.map((obj) => {
 				if (item['pk'] === obj['pk']) {
 					foundItem = true;
@@ -366,9 +368,9 @@ class WeatherView extends React.Component {
 	}
 
 	componentDidMount() {
-		this.pollData();
-		this.intervalID = setInterval(() => this.pollData(), 30000);
-		this.cycleInterval = setInterval(() => this.cycleTemps(), 5000);
+		// this.pollData();
+		// this.intervalID = setInterval(() => this.pollData(), 30000);
+		// this.cycleInterval = setInterval(() => this.cycleTemps(), 5000);
 	}
 	componentWillUnmount() {
 		clearInterval(this.intervalID);
