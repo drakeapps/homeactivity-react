@@ -120,6 +120,8 @@ class ActivityList extends React.Component {
 
 		this.intervalID = 0;
 
+		this.ws = null;
+
 		this.state = {
 			items: this.props.items,
 			category: this.props.category
@@ -154,12 +156,52 @@ class ActivityList extends React.Component {
 		  });
 	}
 
+	handleMessage (data) {
+		const items = this.state.items;
+		data.forEach((item) => {
+			let foundItem = false;
+			items = items.map((obj) => {
+				if (item['pk'] === obj['pk']) {
+					foundItem = true;
+					return item;
+				} else {
+					return obj;
+				}
+			});
+			if (!foundItem) {
+				items.push(item);
+			}
+		});
+		items.sort((a,b) => a.next_checkin - b.next_checkin);
+		this.setState({ items });
+	}
+
 	componentDidMount() {
-		this.pollData();
-		this.intervalID = setInterval(() => this.pollData(), 5000);
+		// this.pollData();
+		// this.intervalID = setInterval(() => this.pollData(), 5000);
+
+		this.ws = new WebSocket(`wss://dashsocket.xrho.com`);
+
+		this.ws.onopen = () => {
+			console.log('websocket connection opened');
+		};
+
+		this.ws.onerror = (error) => {
+			console.error(`websocket error: ${error}`);
+		};
+
+		this.ws.onclose = (event) => {
+			console.log(`websocket connection closed`);
+			// ideally try to reconnect
+		};
+
+		this.ws.onmessage = (event) => {
+			handleMessage(JSON.parse(event.data));
+		};
 	}
 	componentWillUnmount() {
-		clearInterval(this.intervalID);
+		// clearInterval(this.intervalID);
+		this.ws.close();
 	}
 }
 
