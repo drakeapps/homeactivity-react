@@ -140,6 +140,39 @@ class ActivityList extends React.Component {
 		// return (<div className="container">{rows.map(item => <React.Fragment>{item}</React.Fragment>)}</div>)
 	}
 
+	websocketConnect () {
+		this.ws = new WebSocket(`wss://dashsocket.xrho.com`);
+
+		this.ws.onopen = () => {
+			console.log('websocket connection opened');
+		};
+
+		this.ws.onerror = (error) => {
+			console.error(`websocket error: ${error}`);
+		};
+
+		this.ws.onclose = (event) => {
+			console.log(`websocket connection closed`);
+			// if closed not because of unmount
+			// wait 5 seconds
+			// attempt to reconnect, otherwise reload
+			if (event.reason !== 'unmount') {
+				setTimeout(() => {
+					try {
+						console.log(``)
+						this.websocketConnect();
+					} catch (error) {
+						location.reload();
+					}
+				}, 5000);
+			}
+		};
+
+		this.ws.onmessage = (event) => {
+			this.handleMessage(JSON.parse(event.data));
+		};
+	}
+
 	handleMessage (data) {
 		console.log(data);
 		let items = this.state.items;
@@ -163,40 +196,11 @@ class ActivityList extends React.Component {
 	}
 
 	componentDidMount() {
-		// this.pollData();
-		// this.intervalID = setInterval(() => this.pollData(), 5000);
-
-		this.ws = new WebSocket(`wss://dashsocket.xrho.com`);
-
-		this.ws.onopen = () => {
-			console.log('websocket connection opened');
-		};
-
-		this.ws.onerror = (error) => {
-			console.error(`websocket error: ${error}`);
-		};
-
-		this.ws.onclose = (event) => {
-			console.log(`websocket connection closed`);
-			console.log(event);
-			// wait 5 seconds
-			// attempt to reconnect, otherwise reload
-			setTimeout(() => {
-				try {
-					this.ws = new WebSocket(`wss://dashsocket.xrho.com`);
-				} catch (error) {
-					location.reload();
-				}
-			}, 5000);
-		};
-
-		this.ws.onmessage = (event) => {
-			this.handleMessage(JSON.parse(event.data));
-		};
+		this.websocketConnect();
 	}
 	componentWillUnmount() {
-		// clearInterval(this.intervalID);
-		// this.ws.onclose = null;
+		// shouldn't be necessary to clear the close, since we check reason, but doesn't hurt
+		this.ws.onclose = null;
 		this.ws.close(1000, 'unmount');
 	}
 }
