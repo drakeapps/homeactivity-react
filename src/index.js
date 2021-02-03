@@ -198,7 +198,7 @@ class ActivityList extends React.Component {
 		};
 
 		this.ws.onmessage = (event) => {
-			handleMessage(JSON.parse(event.data));
+			this.handleMessage(JSON.parse(event.data));
 		};
 	}
 	componentWillUnmount() {
