@@ -158,7 +158,7 @@ class ActivityList extends React.Component {
 
 	handleMessage (data) {
 		console.log(data);
-		const items = this.state.items;
+		let items = this.state.items;
 		data.forEach((item) => {
 			let foundItem = false;
 			console.log(item);
