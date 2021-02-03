@@ -174,7 +174,7 @@ class ActivityList extends React.Component {
 				items.push(item);
 			}
 		});
-		items.sort((a,b) => a.next_checkin - b.next_checkin);
+		items = items.sort((a,b) => a.next_checkin - b.next_checkin);
 		this.setState({ items });
 	}
 
