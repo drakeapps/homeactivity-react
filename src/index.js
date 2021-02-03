@@ -177,7 +177,8 @@ class ActivityList extends React.Component {
 		};
 
 		this.ws.onclose = (event) => {
-			console.log(`websocket connection closed ${event}`);
+			console.log(`websocket connection closed`);
+			console.log(event);
 			// wait 5 seconds
 			// attempt to reconnect, otherwise reload
 			setTimeout(() => {
@@ -195,6 +196,7 @@ class ActivityList extends React.Component {
 	}
 	componentWillUnmount() {
 		// clearInterval(this.intervalID);
+		// this.ws.onclose = null;
 		this.ws.close(1000, 'unmount');
 	}
 }
