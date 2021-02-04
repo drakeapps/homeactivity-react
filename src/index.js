@@ -121,6 +121,8 @@ class ActivityList extends React.Component {
 
 		this.intervalID = 0;
 
+		this.ws = null;
+
 		this.state = {
 			items: this.props.items,
 			category: this.props.category
@@ -131,10 +133,7 @@ class ActivityList extends React.Component {
 	render () {
 		const rows = [];
 		if (this.state.items.length > 0){
-			// this.state.items.forEach((item) => {
-			// 	rows.push(<ActivityItem activityText={item.activity_text} lastTime={item.last_time} pk={item.pk} ></ActivityItem>);
-			// });
-			return (<>{this.state.items.map((item, index) => <ActivityItem activityText={item.activity_text} lastTime={item.last_checkin} nextTime={item.next_checkin} pk={item.pk} key={item.pk} ></ActivityItem>)}</>)
+			return (<>{this.state.items.map((item, index) => (this.state.category === 0 || this.state.category === item.category) ? <ActivityItem activityText={item.activity_text} lastTime={item.last_checkin} nextTime={item.next_checkin} pk={item.pk} key={item.pk} ></ActivityItem> : <></>)}</>)
 		} else {
 			return (<div>Loading..</div>)
 		}
@@ -142,25 +141,68 @@ class ActivityList extends React.Component {
 		// return (<div className="container">{rows.map(item => <React.Fragment>{item}</React.Fragment>)}</div>)
 	}
 
-	pollData () {
-		window.fetch('/api/category.json/' + this.state.category + '?' + Date.now())
-		  .then(response => response.json())
-		  .then((items) => {
-				// items.sort((a,b) => (a.next_checkin > b.next_checkin) ? 1 : -1);
-				items.sort((a,b) => a.next_checkin - b.next_checkin);
-				this.setState({ items })
-		  },
-		  (error) => {
-			  console.log('request failed');
-		  });
+	websocketConnect () {
+		this.ws = new WebSocket(`wss://dashsocket.xrho.com`);
+
+		this.ws.onopen = () => {
+			console.log('websocket connection opened');
+		};
+
+		this.ws.onerror = (error) => {
+			console.error(`websocket error: ${error}`);
+		};
+
+		this.ws.onclose = (event) => {
+			console.log(`websocket connection closed`);
+			// if closed not because of unmount
+			// wait 5 seconds
+			// attempt to reconnect, otherwise reload
+			if (event.reason !== 'unmount') {
+				setTimeout(() => {
+					try {
+						console.log(``)
+						this.websocketConnect();
+					} catch (error) {
+						location.reload();
+					}
+				}, 5000);
+			}
+		};
+
+		this.ws.onmessage = (event) => {
+			this.handleMessage(JSON.parse(event.data));
+		};
+	}
+
+	handleMessage (data) {
+		console.log(data);
+		let items = this.state.items;
+		data.forEach((item) => {
+			let foundItem = false;
+			console.log(item);
+			items = items.map((obj) => {
+				if (item['pk'] === obj['pk']) {
+					foundItem = true;
+					return item;
+				} else {
+					return obj;
+				}
+			});
+			if (!foundItem) {
+				items.push(item);
+			}
+		});
+		items = items.sort((a,b) => a.next_checkin - b.next_checkin);
+		this.setState({ items });
 	}
 
 	componentDidMount() {
-		this.pollData();
-		this.intervalID = setInterval(() => this.pollData(), 5000);
+		this.websocketConnect();
 	}
 	componentWillUnmount() {
-		clearInterval(this.intervalID);
+		// shouldn't be necessary to clear the close, since we check reason, but doesn't hurt
+		this.ws.onclose = null;
+		this.ws.close(1000, 'unmount');
 	}
 }
 
@@ -325,9 +367,9 @@ class WeatherView extends React.Component {
 	}
 
 	componentDidMount() {
-		this.pollData();
-		this.intervalID = setInterval(() => this.pollData(), 30000);
-		this.cycleInterval = setInterval(() => this.cycleTemps(), 5000);
+		// this.pollData();
+		// this.intervalID = setInterval(() => this.pollData(), 30000);
+		// this.cycleInterval = setInterval(() => this.cycleTemps(), 5000);
 	}
 	componentWillUnmount() {
 		clearInterval(this.intervalID);
